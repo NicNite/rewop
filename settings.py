@@ -3,12 +3,12 @@ APP_PATH = 'rewop/'
 logger_conf = {
     'filename': 'rewop.log',
     'format': '[%(asctime)s] %(message)s',
-    'level': 10
+    'level': 1
 }
 
 rewop_config = {
-    'test': True,
-    'interval': 20
+    'test': False,
+    'interval': 5  #WAS 20
 }
 
 axpert_conf = {
@@ -27,7 +27,7 @@ pylontech_conf = {
 
 econcms_conf = {
     'server': 'emoncms.org',
-    'api_key': 'your_econcms_api_key'
+    'api_key': '943ef3cab3dc98895cb855f9d606abac'
 }
 
 ifttt_conf = {

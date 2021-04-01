@@ -18,7 +18,8 @@ from settings import logger_conf, rewop_config
 
 @dataclass_json
 @dataclass
-class SystemData:
+class \
+        SystemData:
     grid_available: int = 0
     grid_mode: int = 0
     battery_mode: int = 0
@@ -66,6 +67,7 @@ class Collector(object):
         return self
 
     def is_pylontech_port(self, port):
+        return True
         for x in range(3):
             try:
                 p_response = process_pylontech(port)
@@ -82,22 +84,22 @@ class Collector(object):
 
         signal.signal(signal.SIGALRM, self.handler)
 
-        pylontech_port = '/dev/ttyUSB0'
-        axpert_port = '/dev/ttyUSB1'
+        pylontech_port = '/dev/ttyUSB1'
+        axpert_port = '/dev/ttyUSB0'
 
         if not self.is_pylontech_port(pylontech_port):
             # switch the ports
-            pylontech_port = '/dev/ttyUSB1'
-            axpert_port = '/dev/ttyUSB0'
+            pylontech_port = '/dev/ttyUSB0'
+            axpert_port = '/dev/ttyUSB1'
 
         while True:
             # 30 second timeout
             signal.alarm(120)
 
             try:
-                p_response = process_pylontech(pylontech_port)
+                 p_response = process_pylontech(pylontech_port)
             except Exception as e:
-                self.log("Pylontech server error {}".format(e))
+                 self.log("Pylontech server error {}".format(e))
 
             try:
                 a_response = process_axpert(axpert_port)
@@ -107,27 +109,28 @@ class Collector(object):
             system_data = self.get_system_data(p_response, a_response)
 
             if system_data:
-                try:
-                    with PoolController(system_data) as pool_controller:
-                        system_data.pool_mode = pool_controller.process()
-                        if system_data.pool_mode == PoolController.ON:
-                            system_data.pool_on = 1
-                        else:
-                            system_data.pool_on = 0
-                except Exception as e:
-                    self.log.error("Error processing pool data {}".format(e))
+                # try:
+                #     with PoolController(system_data) as pool_controller:
+                #         system_data.pool_mode = pool_controller.process()
+                #         if system_data.pool_mode == PoolController.ON:
+                #             system_data.pool_on = 1
+                #         else:
+                #             system_data.pool_on = 0
+                # except Exception as e:
+                #     self.log.error("Error processing pool data {}".format(e))
 
-                with InverterController() as load_shedding_controller:
-                    is_load_shedding = load_shedding_controller.process_load_shedding()
+                # with InverterController() as load_shedding_controller:
+                #     is_load_shedding = load_shedding_controller.process_load_shedding()
+                #
+                #     if is_load_shedding is None:
+                #         system_data.load_shedding = 2
+                #     elif is_load_shedding:
+                #         system_data.load_shedding = 0
+                #     else:
+                #         system_data.load_shedding = 1
+                #
+                # self.log.info("System Data {}".format(system_data))
 
-                    if is_load_shedding is None:
-                        system_data.load_shedding = 2
-                    elif is_load_shedding:
-                        system_data.load_shedding = 0
-                    else:
-                        system_data.load_shedding = 1
-
-                self.log.info("System Data {}".format(system_data))
                 try:
                     with Emoncms() as emoncms:
                         emoncms.send('system', system_data.to_json())

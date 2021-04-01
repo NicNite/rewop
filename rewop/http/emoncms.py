@@ -29,6 +29,7 @@ class Emoncms(object):
             if rewop_config['test']:
                 return True
 
+            self.log.debug(url)
             self.connection.request("GET", url)
             response = self.connection.getresponse()
 
