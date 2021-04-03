@@ -72,9 +72,13 @@ class AxpertCollector(object):
         if AxpertCollector.error_count > axpert_conf['error_reboot_count']:
             self.log.error(
                 "Axpert Controller maximum errors reached {}, rebooting the system".format(AxpertCollector.error_count))
-            os.system('reboot')
+#            os.system('reboot')
 
         return response
+
+
+    def check_if_present(self):
+        return self.send_command_qpigs()
 
     def process_axpert_data(self):
         qpigs_response = self.send_command_qpigs()
@@ -97,7 +101,7 @@ class AxpertCollector(object):
     # Device data enquiry
     def send_command_qpigs(self):
 
-        if not rewop_config['test']:
+        if not rewop_config['testAxpert']:
             response = self.send_inverter_command('QPIGS', '')
         else:
             response = Response(Status.OK, '238.6 49.9 230.2 49.8 0736 0691 017 385 48.60 000 023 '
@@ -109,7 +113,7 @@ class AxpertCollector(object):
     # Device extra data enquiry
     def send_command_qpgs0(self):
 
-        if not rewop_config['test']:
+        if not rewop_config['testAxpert']:
             response = self.send_inverter_command('QPGS0', '')
         else:
             response = Response(Status.OK, '1 92931504140321 B 00 237.0 50.15 230.1 50.17 0621 0565 014 49.6 000 043'
@@ -121,7 +125,7 @@ class AxpertCollector(object):
     # Device settings enquiry
     def send_command_qpiri(self):
 
-        if not rewop_config['test']:
+        if not rewop_config['testAxpert']:
             response = self.send_inverter_command('QPIRI', '')
         else:
             response = Response(Status.OK, '230.0 21.7 230.0 50.0 21.7 5000 4000 48.0 48.0 48.0 52.4 52.0 2 02 040 1 2 '
@@ -133,7 +137,7 @@ class AxpertCollector(object):
     # Back To Utility volts
     def send_command_pbcv(self, volts):
 
-        if not rewop_config['test']:
+        if not rewop_config['testAxpert']:
             response = self.send_inverter_command('PBCV', volts)
         else:
             response = Response(Status.OK, '')
@@ -143,7 +147,7 @@ class AxpertCollector(object):
 
     def send_command_pbdv(self, volts):
 
-        if not rewop_config['test']:
+        if not rewop_config['testAxpert']:
             response = self.send_inverter_command('PBDV', volts)
         else:
             response = Response(Status.OK, '')
@@ -152,7 +156,7 @@ class AxpertCollector(object):
         # Output source priority
 
     def send_command_pop(self, pop):
-        if not rewop_config['test']:
+        if not rewop_config['testAxpert']:
             response = self.send_inverter_command('POP', pop)
         else:
             response = Response(Status.OK, '')
@@ -169,7 +173,7 @@ class AxpertCollector(object):
         return self.send_command_pop('02')
 
     def send_command_muchgc(self, amps):
-        if not rewop_config['test']:
+        if not rewop_config['testAxpert']:
             response = self.send_inverter_command('MUCHGC', amps)
         else:
             response = Response(Status.OK, '')

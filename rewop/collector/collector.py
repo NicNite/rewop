@@ -41,17 +41,26 @@ def process_pylontech(port):
     with PylontechCollector(port) as collector:
         return collector.process()
 
+def check_pylontech(port):
+    with PylontechCollector(port) as collector:
+        return collector.check_if_present()
+
 
 def process_axpert(port):
     AxpertCollector.port = port
     with AxpertCollector() as collector:
         return collector.process()
 
+def check_axpert(port):
+    AxpertCollector.port = port
+    with AxpertCollector() as collector:
+        return collector.check_if_present();
 
 class Collector(object):
     CHARGE_PV = '110'
     CHARGE_AC = '101'
     CHARGE_PV_AC = '111'
+    NOPORT='noport'
 
     def __init__(self):
         self.is_pool_pump_on = None
@@ -67,10 +76,9 @@ class Collector(object):
         return self
 
     def is_pylontech_port(self, port):
-        return True
         for x in range(3):
             try:
-                p_response = process_pylontech(port)
+                p_response = check_pylontech(port)
 
                 if p_response:
                     return True
@@ -79,18 +87,47 @@ class Collector(object):
             time.sleep(2)
         return False
 
+    def is_axpert_port(self, port):
+        for x in range(3):
+            try:
+                p_response = check_axpert(port)
+                if p_response:
+                    return True
+            except Exception as e:
+                self.log("Axpert server error {}".format(e))
+            time.sleep(2)
+        return False
+
+
     def process(self):
         self.log.info("Starting collectors")
 
+        pylontech_port = self.NOPORT
+        axpert_port = self.NOPORT
+
         signal.signal(signal.SIGALRM, self.handler)
 
-        pylontech_port = '/dev/ttyUSB1'
-        axpert_port = '/dev/ttyUSB0'
+        for x in range(5):
+            pylontech_port = '/dev/ttyUSB'+str(x)
+            if self.is_pylontech_port(pylontech_port):
+                self.log.info("Found pylontech on port"+pylontech_port)
+                break
+            pylontech_port = self.NOPORT
 
-        if not self.is_pylontech_port(pylontech_port):
-            # switch the ports
-            pylontech_port = '/dev/ttyUSB0'
-            axpert_port = '/dev/ttyUSB1'
+        for x in range(5):
+            axpert_port = '/dev/ttyUSB'+str(x)
+            if axpert_port==pylontech_port:
+                continue
+            if self.is_axpert_port(axpert_port):
+                self.log.info("Found axpert on port"+axpert_port)
+                break
+            axpert_port = self.NOPORT
+
+        if axpert_port==self.NOPORT or pylontech_port==self.NOPORT:
+            self.log.error("Error finding devices on ports - axpert="+axpert_port+" pylontech="+pylontech_port)
+        else:
+            self.log.info("Found ports:\nPylontech="+pylontech_port+"\nAxpert="+axpert_port)
+            print("Found ports:\nPylontech="+pylontech_port+"\nAxpert="+axpert_port)
 
         while True:
             # 30 second timeout

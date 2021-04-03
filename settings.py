@@ -7,8 +7,10 @@ logger_conf = {
 }
 
 rewop_config = {
-    'test': False,
-    'interval': 5  #WAS 20
+    'test': False, #only true if both Axpert and Pylon are true
+    'testAxpert': False,
+    'testPylon': False,
+    'interval': 20
 }
 
 axpert_conf = {
@@ -27,7 +29,7 @@ pylontech_conf = {
 
 econcms_conf = {
     'server': 'emoncms.org',
-    'api_key': '943ef3cab3dc98895cb855f9d606abac'
+    'api_key': 'api_key'
 }
 
 ifttt_conf = {

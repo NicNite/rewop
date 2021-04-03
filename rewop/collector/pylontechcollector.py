@@ -9,10 +9,10 @@ from rewop.http.emoncms import Emoncms
 from settings import logger_conf, pylontech_conf, rewop_config
 
 PowerSystemFields = [b'System Volt', b'System Curr', b'System SOC', b'System SOH', b'Highest voltage',
-                     b'Average voltage', b'Lowest voltage']
+                     b'Average voltage', b'Lowest voltage',b'Average temperature']
 
 PowerSystemResponse = namedtuple('Response', ['system_volts', 'system_current', 'system_soc', 'system_soh', 'volts_max',
-                                              'volts_avg', 'volts_min'])
+                                              'volts_avg', 'volts_min','average_temp'])
 
 SOHResponse = namedtuple('Response', ['battery', 'cell', 'volts', 'count', 'status'])
 
@@ -51,6 +51,9 @@ class PylontechCollector(object):
 
         return response
 
+    def check_if_present(self):
+        return self.send_pwrsys_command()
+
     def process_power_system(self):
         response = self.send_pwrsys_command()
 
@@ -77,7 +80,7 @@ class PylontechCollector(object):
 
     def send_pwrsys_command(self):
 
-        if not rewop_config['test']:
+        if not rewop_config['testPylon']:
             data = self.send_command('pwrsys')
         else:
             data = b'pwrsys\n\r@\r\r\n Power System Information\r\r\n ---------------------------------\r\r\n System is discharging\r\r\n Total Num                : 2        \r\r\n Present Num              : 2        \r\r\n Sleep Num                : 0        \r\r\n System Volt              : 52566    mV\r\r\n System Curr              : -3448    mA\r\r\n System RC                : 99876    mAH\r\r\n System FCC               : 99900    mAH\r\r\n System SOC               : 99       %\r\r\n System SOH               : 100      %\r\r\n Highest voltage          : 3521     mV\r\r\n Average voltage          : 3504     mV\r\r\n Lowest voltage           : 3486     mV\r\r\n Highest temperature      : 29000    mC\r\r\n Average temperature      : 28500    mC\r\r\n Lowest temperature       : 28000    mC\r\r\n Recommend chg voltage    : 53250    mV\r\r\n Recommend dsg voltage    : 47000    mV\r\r\n Recommend chg current    : 10000    mA\r\r\n Recommend dsg current    : -50000   mA\r\n\rCommand completed successfully\r\n\r$$\r\n\rpylon_debug>'
@@ -97,7 +100,7 @@ class PylontechCollector(object):
 
     def send_soh_command(self, battery):
 
-        if not rewop_config['test']:
+        if not rewop_config['testPylon']:
             if battery == 0:
                 cmd = 'soh'
             else:
